@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  flowlytics:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - DATABASE_URL=/app/data/analytics.db
+      - ALLOWED_ORIGINS=*
+      - RATE_LIMIT=100
+      - MAX_EVENTS=1000000
+      - RETENTION_DAYS=90
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+      - ./frontend:/app/frontend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # Optional: Add PostgreSQL for larger scale deployments
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: flowlytics
+  #     POSTGRES_USER: flowlytics
+  #     POSTGRES_PASSWORD: your_secure_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+  # Optional: Add Redis for session storage and caching
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - redis_data:/data
+
+volumes:
+  # postgres_data:
+  # redis_data:
+  data:

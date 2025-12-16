@@ -1,0 +1,43 @@
+[Unit]
+Description=Flowlytics Analytics Server
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=flowlytics
+Group=flowlytics
+WorkingDirectory=/opt/flowlytics
+ExecStart=/opt/flowlytics/flowlytics
+Restart=always
+RestartSec=5
+
+# Security settings
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/flowlytics/data
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+MemoryLimit=1G
+CPUQuota=200%
+
+# Environment
+Environment=PORT=8080
+Environment=DATABASE_URL=/opt/flowlytics/data/analytics.db
+Environment=LOG_LEVEL=INFO
+EnvironmentFile=-/opt/flowlytics/.env
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=flowlytics
+
+[Install]
+WantedBy=multi-user.target
